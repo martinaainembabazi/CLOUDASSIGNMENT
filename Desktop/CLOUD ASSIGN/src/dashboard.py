@@ -182,7 +182,7 @@ def load_dashboard_data() -> dict[str, object]:
                     "top_inventors": top_inventors.head(10).to_dict(orient="records"),
                     "top_companies": top_companies.head(10).to_dict(orient="records"),
                     "top_countries": top_countries.head(10).to_dict(orient="records"),
-                    "patents_over_time": patents_over_time.to_dict(orient="records"),
+                    "patents_over_time": patents_over_time,
                 }
             else:
                 st.error("Missing data/patents.db — run src/pipeline.py first")
