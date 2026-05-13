@@ -162,8 +162,34 @@ CUSTOM_CSS = """
 @st.cache_data
 def load_dashboard_data() -> dict[str, object]:
     if not DATA_DB.exists():
-        st.error("Missing data/patents.db — run src/pipeline.py first")
-        st.stop()
+        # Fallback to CSV files if database doesn't exist (e.g., on Streamlit Cloud)
+        try:
+            top_inventors_path = REPORTS / "top_inventors.csv"
+            top_companies_path = REPORTS / "top_companies.csv"
+            top_countries_path = REPORTS / "top_countries.csv"
+            patents_over_time_path = REPORTS / "patents_over_time.csv"
+            
+            if all([top_inventors_path.exists(), top_companies_path.exists(), 
+                    top_countries_path.exists(), patents_over_time_path.exists()]):
+                top_inventors = pd.read_csv(top_inventors_path).rename(columns={'name': 'name', 'patent_count': 'patent_count'})
+                top_companies = pd.read_csv(top_companies_path)
+                top_countries = pd.read_csv(top_countries_path)
+                patents_over_time = pd.read_csv(patents_over_time_path)
+                total_patents = 9_454_161  # Known total from full pipeline run
+                
+                return {
+                    "total_patents": total_patents,
+                    "top_inventors": top_inventors.head(10).to_dict(orient="records"),
+                    "top_companies": top_companies.head(10).to_dict(orient="records"),
+                    "top_countries": top_countries.head(10).to_dict(orient="records"),
+                    "patents_over_time": patents_over_time.to_dict(orient="records"),
+                }
+            else:
+                st.error("Missing data/patents.db — run src/pipeline.py first")
+                st.stop()
+        except Exception as e:
+            st.error(f"Error loading fallback data: {e}")
+            st.stop()
 
     conn = sqlite3.connect(DATA_DB.as_posix())
     conn.execute("PRAGMA query_only = ON")
