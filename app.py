@@ -6,8 +6,5 @@ from pathlib import Path
 project_dir = Path(__file__).parent / "Desktop" / "CLOUD ASSIGN"
 sys.path.insert(0, str(project_dir))
 
-# Import and run the dashboard
-from src.dashboard import main
-
-if __name__ == "__main__":
-    main()
+# Import the dashboard - Streamlit will execute it automatically
+import src.dashboard
