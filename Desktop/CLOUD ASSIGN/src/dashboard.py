@@ -5,8 +5,14 @@ import sqlite3
 from pathlib import Path
 
 import pandas as pd
-import plotly.express as px
 import streamlit as st
+
+try:
+    import plotly.express as px
+    HAS_PLOTLY = True
+except ImportError:
+    HAS_PLOTLY = False
+    px = None
 
 ROOT = Path(__file__).resolve().parents[1]
 REPORTS = ROOT / "reports"
@@ -302,7 +308,7 @@ def main() -> None:
         left, right = st.columns([1.2, 1])
         with left:
             st.markdown("<h3 class='section-title'>Country Focus</h3>", unsafe_allow_html=True)
-            if not countries.empty:
+            if not countries.empty and HAS_PLOTLY:
                 fig = px.bar(
                     countries.head(12).sort_values("patent_count"),
                     x="patent_count",
@@ -332,7 +338,7 @@ def main() -> None:
         left, right = st.columns([1.1, 0.9])
         with left:
             st.markdown("<h3 class='section-title'>Inventor Concentration</h3>", unsafe_allow_html=True)
-            if not inventors.empty:
+            if not inventors.empty and HAS_PLOTLY:
                 fig = px.pie(
                     inventors.head(8),
                     names="name",
@@ -354,7 +360,7 @@ def main() -> None:
 
     with tab3:
         st.markdown("<h3 class='section-title'>Company View</h3>", unsafe_allow_html=True)
-        if not companies.empty:
+        if not companies.empty and HAS_PLOTLY:
             fig = px.scatter(
                 companies.head(10),
                 x="name",
@@ -374,7 +380,7 @@ def main() -> None:
         c1, c2 = st.columns([1, 1])
         with c1:
             st.markdown("<h3 class='section-title'>Trend Over Time</h3>", unsafe_allow_html=True)
-            if not patents_over_time.empty:
+            if not patents_over_time.empty and HAS_PLOTLY:
                 fig = px.line(
                     patents_over_time,
                     x="year",
